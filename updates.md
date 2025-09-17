@@ -411,7 +411,7 @@ Users on RTL locales (e.g., Arabic) saw OTP cells flow right-to-left, which is c
 - Back behavior: go back within WebView if possible; otherwise navigate to `/`.
 
 ### Config
-- Updated `DOMAIN_PATH` to `sellerwise.devefinance.com`.
+- Updated `DOMAIN_PATH` to `jwod.store`.
 
 ### Tech
 - `NavigationService.handleUrls` now supports `useGo` to choose between `context.go` and `context.push`.
@@ -527,7 +527,7 @@ Users on RTL locales (e.g., Arabic) saw OTP cells flow right-to-left, which is c
 - Back behavior: go back within WebView if possible; otherwise navigate to `/`.
 
 ### Config
-- Updated `DOMAIN_PATH` to `sellerwise.devefinance.com`.
+- Updated `DOMAIN_PATH` to `jwod.store`.
 
 ### Tech
 - `NavigationService.handleUrls` now supports `useGo` to choose between `context.go` and `context.push`.

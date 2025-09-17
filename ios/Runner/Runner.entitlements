@@ -10,8 +10,8 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:sellerwise.devefinance.com</string>
-		<string>applinks:sellerwise.devefinance.com</string>
+		<string>webcredentials:jwod.store</string>
+		<string>applinks:jwod.store</string>
 	</array>
 </dict>
 </plist>
