@@ -3,7 +3,6 @@ import 'package:active_ecommerce_cms_demo_app/my_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../services/navigation_service.dart';
@@ -30,6 +29,7 @@ class _CommonWebviewScreenState extends State<CommonWebviewScreen> {
     super.initState();
     webView();
   }
+  bool _isInitialLoadDone = false;
 
   webView() {
     _webViewController
@@ -39,13 +39,19 @@ class _CommonWebviewScreenState extends State<CommonWebviewScreen> {
         NavigationDelegate(
           onNavigationRequest: (request) async {
             final Uri? uri = Uri.tryParse(request.url);
-            if (uri != null && await canLaunchUrl(uri)) {
-              NavigationService.handleUrls(request.url, useGo: true);
+            if (uri != null && _isInitialLoadDone) {
+              final bool handled = await NavigationService.handleUrls(
+                request.url,
+                useGo: true,
+              );
+              if (handled) {
+                return NavigationDecision.prevent;
+              }
             }
-            return NavigationDecision.prevent;
+            return NavigationDecision.navigate;
           },
-          onWebResourceError: (error) {},
-          onPageFinished: (page) {},
+          onPageFinished: (url) => _isInitialLoadDone = true,
+          onPageStarted: (url) => _isInitialLoadDone = false,
         ),
       )
       ..loadRequest(
