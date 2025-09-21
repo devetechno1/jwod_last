@@ -119,8 +119,7 @@ class _LoginState extends State<Login> {
       Loading.close();
       ToastComponent.showDialog(loginResponse.message!);
 
-      final bool needHandleAddress =
-          homeData.needHandleAddressNavigation();
+      final bool needHandleAddress = homeData.needHandleAddressNavigation();
       if (needHandleAddress) return;
 
       // redirect
@@ -757,25 +756,27 @@ class _LoginState extends State<Login> {
                     //     assetImage: AppImages.otp,
                     //     imageColor: Theme.of(context).primaryColor,
                     //   ),
-                    ...List.generate(
-                      AppConfig.businessSettingsData.otpProviders.length,
-                      (i) {
-                        final OTPProviderModel otpProvider =
-                            AppConfig.businessSettingsData.otpProviders[i];
 
-                        final String providerName =
-                            otpProvider.sendOTPText ?? "OTP";
-                        return LoginWith3rd(
-                          onTap: () => onPressedOTPLogin(
-                            providerName: providerName,
-                            providerType: otpProvider.type,
-                          ),
-                          name: providerName,
-                          networkImage: otpProvider.image,
-                          assetImage: AppImages.otp,
-                        );
-                      },
-                    ),
+                    if (AppConfig.businessSettingsData.allowOTPLogin)
+                      ...List.generate(
+                        AppConfig.businessSettingsData.otpProviders.length,
+                        (i) {
+                          final OTPProviderModel otpProvider =
+                              AppConfig.businessSettingsData.otpProviders[i];
+
+                          final String providerName =
+                              otpProvider.sendOTPText ?? "OTP";
+                          return LoginWith3rd(
+                            onTap: () => onPressedOTPLogin(
+                              providerName: providerName,
+                              providerType: otpProvider.type,
+                            ),
+                            name: providerName,
+                            networkImage: otpProvider.image,
+                            assetImage: AppImages.otp,
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

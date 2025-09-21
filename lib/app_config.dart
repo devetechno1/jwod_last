@@ -41,8 +41,8 @@ class AppConfig {
       PlatformDispatcher.instance.locale.languageCode == 'ar'
           ? app_name_ar
           : app_name_en;
-
-  static bool isDebugMode = kDebugMode;
+ static bool isDebugMode = false;
+  // static bool isDebugMode = kDebugMode;
   static bool turnDevicePreviewOn = isDebugMode;
 
   static String search_bar_text(BuildContext context) {
