@@ -281,6 +281,7 @@ class BusinessSettingsData extends Equatable {
 
   bool get otherLogins =>
       allowFacebookLogin || allowGoogleLogin || otpProviders.isNotEmpty;
+
   bool get useSentry => sentryDSN?.isNotEmpty == true;
   bool get useClarity => clarityProjectId?.isNotEmpty == true;
 

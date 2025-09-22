@@ -33,6 +33,7 @@ import '../../helpers/main_helpers.dart';
 import '../../helpers/shared_value_helper.dart';
 import '../../helpers/shimmer_helper.dart';
 import '../../helpers/system_config.dart';
+import '../../main.dart';
 import '../../my_theme.dart';
 import '../../presenter/cart_counter.dart';
 import '../../repositories/cart_repository.dart';
@@ -133,7 +134,6 @@ class _ProductDetailsState extends State<ProductDetails>
   final List<dynamic> _topProducts = [];
   bool _topProductInit = false;
   bool _isInitialLoadDone = false;
-
   @override
   void initState() {
     quantityText.text = "$_quantity";
@@ -168,7 +168,7 @@ class _ProductDetailsState extends State<ProductDetails>
     });
     fetchAll();
     super.initState();
-     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       controller.setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (request) async {
@@ -2626,44 +2626,50 @@ class _ProductDetailsState extends State<ProductDetails>
       child: Stack(
         children: [
           WebViewWidget(controller: controller),
-          if ((webViewHeight ?? 0) > height)
-            Positioned.fill(
-              child: Container(
-                alignment: AlignmentDirectional.bottomEnd,
-                decoration: !isExpanded
-                    ? BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0.5, 1],
-                          colors: [
-                            Colors.transparent,
-                            Theme.of(context).primaryColor,
-                          ],
-                        ),
+          AnimatedPositioned(
+            duration: const Duration(
+              milliseconds: AppDimensions.animationDefaultInMillis,
+            ),
+            top: (webViewHeight ?? 0) > height ? 0 : height,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              alignment: AlignmentDirectional.bottomEnd,
+              decoration: !isExpanded
+                  ? BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.5, 1],
+                        colors: [
+                          Colors.transparent,
+                          Theme.of(context).primaryColor,
+                        ],
+                      ),
+                    )
+                  : null,
+              child: Btn.basic(
+                onPressed: viewMore,
+                child: Text(
+                  isExpanded
+                      ? 'less'.tr(context: context)
+                      : 'view_more'.tr(context: context),
+                  style: TextStyle(
+                    color: isExpanded ? null : Colors.white,
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                        offset: const Offset(0.0, 3.0),
                       )
-                    : null,
-                child: Btn.basic(
-                  onPressed: viewMore,
-                  child: Text(
-                    isExpanded
-                        ? 'less'.tr(context: context)
-                        : 'view_more'.tr(context: context),
-                    style: TextStyle(
-                      color: isExpanded ? null : Colors.white,
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: const Offset(0.0, 3.0),
-                        )
-                      ],
-                    ),
+                    ],
                   ),
                 ),
               ),
-            )
+            ),
+          )
         ],
       ),
     );
@@ -2675,9 +2681,11 @@ class _ProductDetailsState extends State<ProductDetails>
     });
     getDescriptionHeight();
   }
+
   int errorsTimes = 0;
+
   Future<void> getDescriptionHeight() async {
-   if (errorsTimes > 3) return;
+    if (errorsTimes > 3) return;
 
     errorsTimes++;
     try {
@@ -2690,8 +2698,10 @@ class _ProductDetailsState extends State<ProductDetails>
       }
       webViewHeight = double.parse(value.toString());
       errorsTimes = 0;
+
       setState(() {});
     } catch (e) {
+      recordError(e, StackTrace.current);
       print("Error in runJavaScriptReturningResult : $e - times $errorsTimes");
       return await getDescriptionHeight();
     }

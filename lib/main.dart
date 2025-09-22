@@ -6,7 +6,9 @@ import 'package:active_ecommerce_cms_demo_app/screens/filter.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/update_screen.dart';
 import 'package:active_ecommerce_cms_demo_app/services/navigation_service.dart';
 import 'package:app_links/app_links.dart';
+import 'package:clarity_flutter/clarity_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:one_context/one_context.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_value/shared_value.dart';
 import 'package:device_preview/device_preview.dart';
 
@@ -38,6 +41,7 @@ import 'presenter/unRead_notification_counter.dart';
 import 'providers/blog_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
+import 'repositories/api-request.dart';
 import 'screens/address.dart';
 import 'screens/auction/auction_bidded_products.dart';
 import 'screens/auction/auction_products.dart';
@@ -68,12 +72,9 @@ import 'screens/profile.dart';
 import 'screens/seller_details.dart';
 import 'services/push_notification_service.dart';
 import 'single_banner/photo_provider.dart';
-import 'package:clarity_flutter/clarity_flutter.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
-    if (AppConfig.businessSettingsData.useSentry) {
+  if (AppConfig.businessSettingsData.useSentry) {
     SentryWidgetsFlutterBinding.ensureInitialized();
     await SentryFlutter.init(
       (options) {
@@ -92,7 +93,7 @@ Future<void> appRunner() async {
   ErrorWidget.builder = (e) {
     return CustomErrorWidget(errorMessage: e.summary.value);
   };
-    FlutterError.onError = (FlutterErrorDetails details) {
+  FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     recordError(details.exception, details.stack);
   };
@@ -100,7 +101,6 @@ Future<void> appRunner() async {
     recordError(error, stack);
     return true; // Mark as handled
   };
-
   Widget app = SharedValue.wrapApp(MyApp());
 
   AppConfig.storeType = await StoreType.thisDeviceType();
@@ -115,9 +115,10 @@ Future<void> appRunner() async {
     BusinessSettingHelper().setBusinessSettingData(),
     BusinessSettingHelper.setInitLang(),
     Firebase.initializeApp(),
-    FlutterDownloader.initialize(debug: kDebugMode, ignoreSsl: true),
+    FlutterDownloader.initialize(debug: AppConfig.isDebugMode, ignoreSsl: true),
     Hive.initFlutter(),
   ]);
+  FlutterDownloader.registerCallback(downloadCallback);
 
   localeTranslation = await Hive.openBox<Map>('langs');
 
@@ -146,6 +147,7 @@ Future<void> appRunner() async {
     );
   }
   if (AppConfig.businessSettingsData.useSentry) app = SentryWidget(child: app);
+
   runApp(
     DevicePreview(
       enabled: AppConfig.turnDevicePreviewOn,
@@ -153,10 +155,24 @@ Future<void> appRunner() async {
     ),
   );
 }
-void setCustomUserIdClarity() {
+
+void _setTag(String key, String? value) {
+  if (value?.trim().isNotEmpty == true) {
+    final b = Clarity.setCustomTag(key, value!);
+
+    print(b);
+  }
+}
+
+void setCustomUserDataClarity() {
   if ((user_id.$ != null || temp_user_id.$.isNotEmpty) &&
       AppConfig.businessSettingsData.useClarity) {
     Clarity.setCustomUserId("${user_id.$ ?? temp_user_id.$}");
+    _setTag("id", "${user_id.$ ?? temp_user_id.$}");
+    _setTag("name", user_name.$);
+    _setTag("email", user_email.$);
+    _setTag("phone", user_phone.$);
+    _setTag("language", app_language.$);
   }
 }
 
@@ -180,7 +196,7 @@ var routes = GoRouter(
         path: '/',
         name: "Home",
         redirect: (context, state) {
-          setCustomUserIdClarity();
+          setCustomUserDataClarity();
           final extra = state.extra;
           if (extra is Map<String, dynamic>) {
             if (extra["skipUpdate"] == true) skipUpdate = true;
@@ -417,7 +433,7 @@ class MyMaterialApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    setCustomUserIdClarity();
+    setCustomUserDataClarity();
     return Consumer<LocaleProvider>(
       builder: (context, provider, snapshot) {
         final ThemeProvider theme =
@@ -494,6 +510,7 @@ Future<void> _handleDeepLink() async {
     );
   });
 }
+
 void recordError(Object error, StackTrace? stack) {
   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   if (AppConfig.businessSettingsData.useSentry) {

@@ -29,6 +29,7 @@ class _CommonWebviewScreenState extends State<CommonWebviewScreen> {
     super.initState();
     webView();
   }
+
   bool _isInitialLoadDone = false;
 
   webView() {
