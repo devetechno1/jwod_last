@@ -146,6 +146,13 @@ class _MetroScreenState extends State<MetroScreen>
                           //Best Selling-------------------
                           // if(homeData.isFeaturedProductInitial || homeData.featuredProductList.isNotEmpty)
                           const BestSellingSectionSliver(),
+                          SliverToBoxAdapter(
+                            child: HomeBannersList(
+                              bannersImagesList: homeData.bannerThreeImageList,
+                              isBannersInitial: homeData.isBannerThreeInitial,
+                            ),
+                          ),
+
                           // const VerticalProductsSectionSliver(),
                           //auction products----------------------------
                           AuctionProductsSectionSliver(
