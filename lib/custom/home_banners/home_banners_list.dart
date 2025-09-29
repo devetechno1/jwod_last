@@ -162,16 +162,6 @@ class _HomeBannersListState extends State<HomeBannersList> {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
 // import 'package:active_ecommerce_cms_demo_app/constants/app_dimensions.dart';
 // import 'package:carousel_slider/carousel_slider.dart';
 // import 'package:flutter/material.dart';
