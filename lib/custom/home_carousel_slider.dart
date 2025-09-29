@@ -12,7 +12,7 @@ class HomeCarouselSlider extends StatelessWidget {
     return HomeBannersList(
       isBannersInitial: homeData!.isCarouselInitial,
       bannersImagesList: homeData!.carouselImageList,
-      aspectRatio: 338 / 140,
+      aspectRatio: 340 / 140,
       viewportFraction: 1,
     );
   }
