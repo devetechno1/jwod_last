@@ -219,6 +219,10 @@ var routes = GoRouter(
         },
         routes: [
           GoRoute(
+            path: "go",
+            redirect: (context, state) => "/",
+          ),
+          GoRoute(
               path: "customer_products",
               pageBuilder: (BuildContext context, GoRouterState state) =>
                   const MaterialPage(child: MyClassifiedAds())),
