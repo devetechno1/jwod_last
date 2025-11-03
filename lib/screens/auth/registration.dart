@@ -22,15 +22,16 @@ import 'package:flutter/services.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:one_context/one_context.dart';
+import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
 
 import '../../custom/loading.dart';
 import '../../data_model/otp_provider_model.dart';
 import '../../helpers/auth_helper.dart';
 import '../../helpers/business_setting_helper.dart';
+import '../../presenter/home_provider.dart';
 import '../../repositories/address_repository.dart';
 import '../../ui_elements/select_otp_provider_widget.dart';
-import '../home/home.dart';
 import 'otp.dart';
 import 'package:go_router/go_router.dart';
 
@@ -50,6 +51,8 @@ class _RegistrationState extends State<Registration> {
 
   OTPProviderModel? provider =
       AppConfig.businessSettingsData.otpProviders.firstOrNull;
+
+  late final homeP = context.read<HomeProvider>();
 
   //controllers
   final TextEditingController _nameController = TextEditingController();
@@ -200,11 +203,19 @@ class _RegistrationState extends State<Registration> {
           sound: true,
         );
 
-        final String? fcmToken = await _fcm.getToken();
+        String? fcmToken;
+        try {
+          fcmToken = await _fcm.getToken();
+        } catch (e) {
+          if (Platform.isIOS) {
+            fcmToken = await _fcm.getAPNSToken();
+          }
+          print('Caught exception: $e');
+        }
 
         print("--fcm token--");
         print("fcmToken $fcmToken");
-        if (is_logged_in.$ == true) {
+        if (is_logged_in.$ == true && fcmToken?.isNotEmpty == true) {
           // update device token
           await ProfileRepository().getDeviceTokenUpdateResponse(fcmToken!);
         }
@@ -229,7 +240,7 @@ class _RegistrationState extends State<Registration> {
         OneContext().context!.push("/");
         await Future.delayed(Duration.zero);
         if (AppConfig.businessSettingsData.sellerWiseShipping) {
-          homeData.handleAddressNavigation(true);
+          homeP.handleAddressNavigation(true);
         }
 
         // Navigator.push(context, MaterialPageRoute(builder: (context) {

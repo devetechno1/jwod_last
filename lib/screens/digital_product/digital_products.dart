@@ -9,11 +9,13 @@ import 'package:active_ecommerce_cms_demo_app/helpers/system_config.dart';
 import 'package:active_ecommerce_cms_demo_app/my_theme.dart';
 import 'package:active_ecommerce_cms_demo_app/repositories/product_repository.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/auction/auction_products_details.dart';
-import 'package:active_ecommerce_cms_demo_app/screens/product/digital_product_details.dart';
 
 import 'package:flutter/material.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
+import '../../helpers/grid_responsive.dart';
+import '../product/product_details.dart';
 
 class DigitalProducts extends StatefulWidget {
   const DigitalProducts({
@@ -158,9 +160,10 @@ class _DigitalProductsState extends State<DigitalProducts> {
   }
 
   Widget body() {
+    final int cross = GridResponsive.columnsForWidth(context);
     if (!_dataFetch) {
-      return ShimmerHelper()
-          .buildProductGridShimmer(scontroller: _mainScrollController);
+      return ShimmerHelper().buildProductGridShimmer(
+          crossAxisCount: cross, scontroller: _mainScrollController);
     }
 
     if (_digitalProducts.isEmpty) {
@@ -246,7 +249,7 @@ class _DigitalProductCardState extends State<DigitalProductCard> {
             builder: (context) {
               return widget.identifier == 'auction'
                   ? AuctionProductsDetails(slug: widget.slug)
-                  : DigitalProductDetails(slug: widget.slug);
+                  : ProductDetails(slug: widget.slug);
             },
           ),
         );

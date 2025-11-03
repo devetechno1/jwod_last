@@ -41,6 +41,13 @@ class CustomLocalization {
         key;
     // return localizedValues[locale.languageCode]?[key] ?? key;
   }
+
+  static String translateWithGivenLocale(String key, Locale locale) {
+    return (localizedValues[locale.languageCode] ??
+            localizedValues[supportedLocales.first.languageCode] ??
+            localizedValues[localizedValues.keys.first])![key] ??
+        key;
+  }
 }
 
 class CustomLocalizationDelegate
@@ -62,10 +69,21 @@ class CustomLocalizationDelegate
 extension StringTr on String {
   String tr({BuildContext? context, Map<String, String>? args}) {
     final _context = context ?? OneContext().context!;
-    String translated = CustomLocalization.of(_context)!.translate(
+    String translated = CustomLocalization.of(_context)?.translate(
       this,
       Provider.of<LocaleProvider>(_context, listen: false).locale,
-    );
+    ) ?? this;
+    if (args != null) {
+      for (String key in args.keys) {
+        translated = translated.replaceAll('{$key}', args[key] ?? key);
+      }
+    }
+    return translated;
+  }
+
+  String trGivenLocale(Locale locale, {Map<String, String>? args}) {
+    String translated =
+        CustomLocalization.translateWithGivenLocale(this, locale);
     if (args != null) {
       for (String key in args.keys) {
         translated = translated.replaceAll('{$key}', args[key] ?? key);

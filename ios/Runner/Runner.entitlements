@@ -10,8 +10,8 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:jwod.store</string>
-		<string>applinks:jwod.store</string>
+		<string>webcredentials:jwodwater.com</string>
+		<string>applinks:jwodwater.com</string>
 	</array>
 </dict>
 </plist>

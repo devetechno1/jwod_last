@@ -1,15 +1,15 @@
 import 'package:active_ecommerce_cms_demo_app/app_config.dart';
 import 'package:flutter/material.dart';
 
-import '../presenter/home_presenter.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 
 class PiratedWidget extends StatelessWidget {
-  final HomePresenter? homeData;
-  const PiratedWidget({Key? key, required this.homeData}) : super(key: key);
+  const PiratedWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (AppConfig.purchase_code != "") return emptyWidget;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         9.0,

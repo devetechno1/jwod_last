@@ -3,25 +3,36 @@ import 'package:active_ecommerce_cms_demo_app/custom/flash%20deals%20banner/flas
 
 import 'package:active_ecommerce_cms_demo_app/helpers/context_ex.dart';
 import 'package:active_ecommerce_cms_demo_app/my_theme.dart';
-import 'package:active_ecommerce_cms_demo_app/presenter/home_presenter.dart';
+import 'package:active_ecommerce_cms_demo_app/presenter/home_provider.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/flash_deal/flash_deal_list.dart';
-import 'package:active_ecommerce_cms_demo_app/screens/home/home.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/home/widgets/time_circular_container.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/home/widgets/time_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
+import 'package:provider/provider.dart';
+
+import '../../../data_model/flash_deal_response.dart';
 
 class FlashSale extends StatelessWidget {
-  const FlashSale({super.key, required this.isCircle, this.backgroundColor});
+  const FlashSale({super.key, required this.isCircle, this.backgroundColor,this.defaultTextColor});
   final bool isCircle;
   final Color? backgroundColor;
+  final Color? defaultTextColor;
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-        listenable: homeData,
-        builder: (context, child) {
-          if (homeData.flashDeal == null) return const SizedBox();
+    return Selector<
+            HomeProvider,
+            ({
+              FlashDealResponseDatum? flashDeal,
+              CurrentRemainingTime flashDealRemainingTime
+            })>(
+        selector: (_, p) => (
+              flashDeal: p.flashDeal,
+              flashDealRemainingTime: p.flashDealRemainingTime
+            ),
+        builder: (context, p, child) {
+          if (p.flashDeal == null) return emptyWidget;
           return Column(
             children: [
               GestureDetector(
@@ -73,16 +84,16 @@ class FlashSale extends StatelessWidget {
                       children: [
                         const SizedBox(height: 10),
                         // any of them > 0 then show timer : sizedBox
-                        (homeData.flashDealRemainingTime.days > 0 ||
-                                homeData.flashDealRemainingTime.hours > 0 ||
-                                homeData.flashDealRemainingTime.min > 0 ||
-                                homeData.flashDealRemainingTime.sec > 0)
-                            ? buildTimerRow(homeData.flashDealRemainingTime)
+                        (p.flashDealRemainingTime.days > 0 ||
+                                p.flashDealRemainingTime.hours > 0 ||
+                                p.flashDealRemainingTime.min > 0 ||
+                                p.flashDealRemainingTime.sec > 0)
+                            ? buildTimerRow(p.flashDealRemainingTime)
                             : const SizedBox.shrink(),
                         const SizedBox(height: 15),
                         FlashBannerWidget(
-                          bannerLink: homeData.flashDeal?.banner,
-                          slug: homeData.flashDeal!.slug,
+                          bannerLink: p.flashDeal?.banner,
+                          slug: p.flashDeal!.slug,
                         ),
                       ],
                     )),
@@ -157,10 +168,10 @@ class FlashSale extends StatelessWidget {
                 ),
                 Flexible(
                   child: Builder(builder: (context) {
-                    final Color textColor =
-                        AppConfig.businessSettingsData.isLightFlashDealTextColor
-                            ? Colors.white
-                            : Colors.black;
+                    final Color  textColor = defaultTextColor ??
+                   ((AppConfig.businessSettingsData.isLightFlashDealTextColor )
+                      ? Colors.white
+                      : Colors.black);
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

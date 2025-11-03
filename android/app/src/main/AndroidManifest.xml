@@ -35,6 +35,7 @@
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
+
         <!-- disable default Initializer -->
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -46,6 +47,7 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+
 
         <activity
             android:name=".MainActivity"
@@ -65,7 +67,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="jwod.store" />
+                <data android:scheme="http" android:host="jwodwater.com" />
                 <data android:scheme="https" />
             </intent-filter>
 

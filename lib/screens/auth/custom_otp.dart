@@ -10,15 +10,16 @@ import 'package:flutter/services.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:provider/provider.dart';
 import 'package:timer_count_down/timer_controller.dart';
 
 import '../../custom/loading.dart';
 import '../../data_model/login_response.dart';
 import '../../helpers/auth_helper.dart';
+import '../../presenter/home_provider.dart';
 import '../../status/execute_and_handle_remote_errors.dart';
 import '../../status/status.dart';
 import '../../ui_elements/otp_input_widget.dart';
-import '../home/home.dart';
 import 'login.dart';
 import 'otp_login.dart';
 
@@ -97,14 +98,16 @@ class _CustomOTPScreenState extends State<CustomOTPScreen> {
 
     await AuthHelper().setUserData(response);
 
-    Future.wait([
+    final homeP = context.read<HomeProvider>();
+
+    await Future.wait([
       saveFCMToken(),
-      homeData.fetchAddressLists(false, false),
+      homeP.fetchAddressLists(true, false),
     ]);
 
     Loading.close();
 
-    final bool needHandleAddress = homeData.needHandleAddressNavigation();
+    final bool needHandleAddress = homeP.needHandleAddressNavigation();
     if (needHandleAddress) return;
 
     context.go("/");

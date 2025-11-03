@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:active_ecommerce_cms_demo_app/middlewares/auth_middleware.dart';
 import 'package:active_ecommerce_cms_demo_app/screens/auth/login.dart';
@@ -17,6 +18,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:one_context/one_context.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_value/shared_value.dart';
 import 'package:device_preview/device_preview.dart';
 
@@ -24,7 +26,10 @@ import 'app_config.dart';
 import 'custom/aiz_route.dart';
 
 import 'custom/error_widget.dart';
+import 'data_model/address_response.dart';
 import 'data_model/business_settings/update_model.dart';
+import 'data_model/login_response.dart';
+import 'helpers/auth_helper.dart';
 import 'helpers/business_setting_helper.dart';
 import 'helpers/main_helpers.dart';
 import 'helpers/shared_value_helper.dart';
@@ -33,12 +38,14 @@ import 'my_theme.dart';
 import 'other_config.dart';
 import 'presenter/cart_counter.dart';
 import 'presenter/cart_provider.dart';
-import 'presenter/currency_presenter.dart'; 
+import 'presenter/currency_presenter.dart';
+import 'presenter/home_provider.dart';
 import 'presenter/select_address_provider.dart';
 import 'presenter/unRead_notification_counter.dart';
 import 'providers/blog_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
+import 'repositories/auth_repository.dart';
 import 'screens/address.dart';
 import 'screens/auction/auction_bidded_products.dart';
 import 'screens/auction/auction_products.dart';
@@ -58,7 +65,6 @@ import 'screens/coupon/coupons.dart';
 import 'screens/flash_deal/flash_deal_list.dart';
 import 'screens/flash_deal/flash_deal_products.dart';
 import 'screens/followed_sellers.dart';
-import 'screens/home/home.dart';
 import 'screens/index.dart';
 import 'screens/orders/order_details.dart';
 import 'screens/orders/order_list.dart';
@@ -69,6 +75,8 @@ import 'screens/profile.dart';
 import 'screens/seller_details.dart';
 import 'services/push_notification_service.dart';
 import 'single_banner/photo_provider.dart';
+import 'status/execute_and_handle_remote_errors.dart';
+import 'status/status.dart';
 
 void main() async {
   if (AppConfig.businessSettingsData.useSentry) {
@@ -85,6 +93,8 @@ void main() async {
   }
 }
 
+late final Address? _initAddress;
+
 Future<void> appRunner() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorWidget.builder = (e) {
@@ -98,7 +108,7 @@ Future<void> appRunner() async {
     recordError(error, stack);
     return true; // Mark as handled
   };
-  Widget app = SharedValue.wrapApp(MyApp());
+  Widget app = SharedValue.wrapApp(const MyApp());
 
   AppConfig.storeType = await StoreType.thisDeviceType();
 
@@ -114,13 +124,15 @@ Future<void> appRunner() async {
     Firebase.initializeApp(),
     Hive.initFlutter(),
   ]);
+  _initAddress = await getDefaultAddress();
+  await _getUserData();
 
   localeTranslation = await Hive.openBox<Map>('langs');
 
   await Future.wait([
     BusinessSettingHelper.handleTranslations(),
     BusinessSettingHelper.getOTPLoginProviders(),
-    homeData.fetchAddressLists(false, false),
+    // homeData.fetchAddressLists(false, false),
   ]);
 
   SystemChrome.setPreferredOrientations([
@@ -149,6 +161,47 @@ Future<void> appRunner() async {
       builder: (context) => app,
     ),
   );
+}
+
+Future<void> _getUserData() async {
+  if (AppConfig.oldTokenKey.trim().isEmpty) return;
+
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  final String? token = prefs.getString(AppConfig.oldTokenKey);
+
+  if (token?.trim().isNotEmpty != true) return;
+
+  access_token.$ = token;
+  await access_token.save();
+
+  final Status<LoginResponse> loginStatus = await executeAndHandleErrors(
+    () => AuthRepository().getUserByTokenResponse(),
+  );
+  if (loginStatus is Success<LoginResponse> &&
+      loginStatus.data.result == true) {
+    final loginResponse = loginStatus.data;
+
+    print("in the success block ");
+
+    prefs.remove(AppConfig.oldTokenKey);
+
+    await AuthHelper().setUserData(loginResponse);
+
+    await saveFCMToken();
+  } else {
+    AuthHelper().clearUserData();
+
+    String error = "an error occurred";
+
+    if (loginStatus.data?.message.runtimeType == List) {
+      error = loginStatus.data!.message!.join("\n");
+    } else if (loginStatus.data?.message != null) {
+      error = loginStatus.data!.message.toString();
+    }
+
+    recordError(error, StackTrace.current);
+  }
 }
 
 void _setTag(String key, String? value) {
@@ -210,7 +263,7 @@ var routes = GoRouter(
             _isUpdateScreenOpened = true;
             return '/update?url=${state.uri.path}';
           }
-          if (homeData.haveToGoAddress) return '/address';
+          if (context.read<HomeProvider>().haveToGoAddress) return '/address';
 
           return null;
         },
@@ -218,6 +271,10 @@ var routes = GoRouter(
           return const MaterialPage(child: Index());
         },
         routes: [
+          GoRoute(
+            path: "go",
+            redirect: (context, state) => "/",
+          ),
           GoRoute(
               path: "customer_products",
               pageBuilder: (BuildContext context, GoRouterState state) =>
@@ -381,6 +438,7 @@ var routes = GoRouter(
 );
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -402,12 +460,17 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (_) => HomeProvider(_initAddress),
+        ),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => CartCounter()),
         ChangeNotifierProvider(create: (context) => SelectAddressProvider()),
         ChangeNotifierProvider(
-            create: (context) => UnReadNotificationCounter()),
+          create: (context) => UnReadNotificationCounter(),
+        ),
         ChangeNotifierProvider(create: (context) => CurrencyPresenter()),
 
         ///
@@ -461,7 +524,7 @@ class MyMaterialApp extends StatelessWidget {
             if (CustomLocalization.isSupported(deviceLocale!))
               return deviceLocale;
 
-            return const Locale('en');
+            return provider.locale;
           },
         );
       },
@@ -507,6 +570,9 @@ Future<void> _handleDeepLink() async {
 }
 
 void recordError(Object error, StackTrace? stack) {
+  log("error: $error");
+  log("stack: $stack");
+
   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   if (AppConfig.businessSettingsData.useSentry) {
     Sentry.captureException(error, stackTrace: stack);

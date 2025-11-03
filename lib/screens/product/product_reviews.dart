@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+import '../../app_config.dart';
+
 class ProductReviews extends StatefulWidget {
   final int? id;
 
@@ -252,7 +254,7 @@ class _ProductReviewsState extends State<ProductReviews> {
             child: Text('no_reviews_yet_be_the_first'.tr(context: context))),
       );
     } else {
-      return Container(); // should never be happening
+      return emptyWidget; // should never be happening
     }
   }
 
@@ -289,7 +291,8 @@ class _ProductReviewsState extends State<ProductReviews> {
                   width: 180,
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        bottom: AppDimensions.paddingDefault),
+                        bottom: AppDimensions.paddingDefault,
+                        left: AppDimensions.paddingDefault),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -394,7 +397,7 @@ class _ProductReviewsState extends State<ProductReviews> {
                     ),
                   ],
                 )
-              : Container(),
+              : emptyWidget,
         ],
       ),
     ));
