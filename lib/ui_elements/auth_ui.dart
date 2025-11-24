@@ -101,7 +101,11 @@ import 'package:active_ecommerce_cms_demo_app/constants/app_images.dart';
 import 'package:active_ecommerce_cms_demo_app/custom/box_decorations.dart';
 import 'package:active_ecommerce_cms_demo_app/custom/device_info.dart';
 import 'package:active_ecommerce_cms_demo_app/my_theme.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+
+import '../custom/useful_elements.dart';
+import '../helpers/shared_value_helper.dart';
 
 class AuthScreen {
   static Widget buildScreen(
@@ -184,19 +188,20 @@ class AuthScreen {
           // Cross Button
           PositionedDirectional(
             top: MediaQuery.paddingOf(context).top + 10,
-            end: 10,
+            start: 10,
             child: GestureDetector(
-              onTap: () => Navigator.pop(context),
+              onTap: () => Navigator.maybePop(context),
               child: Container(
                 padding: const EdgeInsets.all(AppDimensions.paddingSmall),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 24,
+                child: Icon(
+                  app_language_rtl.$!
+                      ? CupertinoIcons.arrow_right
+                      : CupertinoIcons.arrow_left,
+                  color: MyTheme.primaryColor,
                 ),
               ),
             ),

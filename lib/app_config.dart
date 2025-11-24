@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'data_model/business_settings/business_settings.dart';
 import 'data_model/business_settings/update_model.dart';
@@ -13,6 +12,14 @@ export 'constants/app_images.dart';
 
 class AppConfig {
   /// To know the device operating system (ios, huawei or any android device)
+  /// Determines whether the login page should directly show full login fields
+  /// (phone/email + password + others) or just display a single "Login" button
+  /// that navigates to the detailed login form when pressed.
+  /// [showFullLoginFields] = false that means the default behavior will be used
+  /// [showFullLoginFields] = true that means the full login form will be shown
+  static const bool showFullLoginFields = false;
+
+  /// To know the device operating system (ios, huawei or any android device)
   static StoreType storeType = StoreType.unknown;
 
   ///Specifies the splash screen type to use a custom animated widget instead of a static image or traditional screen.
@@ -20,11 +27,11 @@ class AppConfig {
       SplashScreenType.splashAnimatedImageWidget;
 
   /// To make force update to app
-  static String version = '1.0.0';
+  static String version = '1.0.1';
 
   /// App Version (AV) shown on the splash screen.
   /// Used to verify the app build matches the master version.
-  static const String mobileVersion = '9.10.50';
+  static const String mobileVersion = '9.10.54';
 
   /// Backend Version (BV) used for compatibility checks.
   /// Used to verify the app is compatible with backend data.
@@ -78,8 +85,6 @@ class AppConfig {
   // static const String RAW_BASE_URL = "http://192.168.100.200:8080/devef";
   static const String RAW_BASE_URL = "$PROTOCOL$DOMAIN_PATH";
   static const String BASE_URL = "$RAW_BASE_URL/$API_ENDPATH";
-
-  static const LatLng initPlace = LatLng(30.723003387451172, 31.02609634399414);
 
   // static HomePageType selectedHomePageType = HomePageType.home;
   static BusinessSettingsData businessSettingsData = BusinessSettingsData();
