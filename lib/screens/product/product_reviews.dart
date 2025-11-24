@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+import '../../app_config.dart';
+
 class ProductReviews extends StatefulWidget {
   final int? id;
 
@@ -35,7 +37,7 @@ class _ProductReviewsState extends State<ProductReviews> {
   final List<dynamic> _reviewList = [];
   bool _isInitial = true;
   int _page = 1;
-  int? _totalData = 0;
+  int _totalData = 0;
   bool _showLoadingContainer = false;
 
   @override
@@ -62,9 +64,9 @@ class _ProductReviewsState extends State<ProductReviews> {
       widget.id,
       page: _page,
     );
-    _reviewList.addAll(reviewResponse.reviews);
+    _reviewList.addAll(reviewResponse.reviews ?? []);
     _isInitial = false;
-    _totalData = reviewResponse.meta.total;
+    _totalData = reviewResponse.meta?.total ?? 0;
     _showLoadingContainer = false;
     setState(() {});
   }
@@ -252,7 +254,7 @@ class _ProductReviewsState extends State<ProductReviews> {
             child: Text('no_reviews_yet_be_the_first'.tr(context: context))),
       );
     } else {
-      return Container(); // should never be happening
+      return emptyWidget; // should never be happening
     }
   }
 
@@ -289,7 +291,8 @@ class _ProductReviewsState extends State<ProductReviews> {
                   width: 180,
                   child: Padding(
                     padding: const EdgeInsets.only(
-                        bottom: AppDimensions.paddingDefault),
+                        bottom: AppDimensions.paddingDefault,
+                        left: AppDimensions.paddingDefault),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -394,7 +397,7 @@ class _ProductReviewsState extends State<ProductReviews> {
                     ),
                   ],
                 )
-              : Container(),
+              : emptyWidget,
         ],
       ),
     ));

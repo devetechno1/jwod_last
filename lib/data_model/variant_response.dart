@@ -22,7 +22,8 @@ class VariantResponse {
   factory VariantResponse.fromJson(Map<String, dynamic> json) =>
       VariantResponse(
         result: json["result"],
-        variantData: VariantData.fromJson(json["data"]),
+        variantData:
+            json["data"] == null ? null : VariantData.fromJson(json["data"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -37,7 +38,7 @@ class VariantData {
   int? stock;
   int? inCart;
   String? stockTxt;
-  int? digital;
+  bool digital;
   String? variant;
   String? variation;
   int? maxLimit;
@@ -50,7 +51,7 @@ class VariantData {
     this.stock,
     this.inCart,
     this.stockTxt,
-    this.digital,
+    this.digital = false,
     this.variant,
     this.variation,
     this.maxLimit,
@@ -61,14 +62,14 @@ class VariantData {
   factory VariantData.fromJson(Map<String, dynamic> json) => VariantData(
         price: json["price"],
         basePrice: double.tryParse(json["base_price"].toString()) ?? 0,
-        stock: int.parse(json["stock"].toString()),
+        stock: int.tryParse(json["stock"].toString()) ?? 0,
         inCart: int.tryParse(json["in_cart"].toString()),
         stockTxt: "${json["stock_txt"]}",
-        digital: int.parse(json["digital"].toString()),
+        digital: "${json["digital"]}" == '1',
         variant: json["variant"],
         variation: json["variation"],
-        maxLimit: int.parse(json["max_limit"].toString()),
-        inStock: int.parse(json["in_stock"].toString()),
+        maxLimit: int.tryParse(json["max_limit"].toString()) ?? 0,
+        inStock: int.tryParse(json["in_stock"].toString()) ?? 0,
         image: json["image"],
       );
 

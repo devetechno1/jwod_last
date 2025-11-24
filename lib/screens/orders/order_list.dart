@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../app_config.dart';
 import '../../data_model/order_mini_response.dart';
 
 class PaymentStatus {
@@ -46,9 +47,8 @@ class DeliveryStatus {
   }
 }
 
-
-      // case "picked_up":
-      //   return Colors.orangeAccent.shade200;
+// case "picked_up":
+//   return Colors.orangeAccent.shade200;
 class OrderList extends StatefulWidget {
   const OrderList({Key? key, this.from_checkout = false}) : super(key: key);
   final bool from_checkout;
@@ -247,13 +247,13 @@ class _OrderListState extends State<OrderList> {
 
   Padding buildBottomAppBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 18.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             decoration: BoxDecorations.buildBoxDecoration_1(),
-            height: 36,
+            height: 34,
             width: MediaQuery.sizeOf(context).width * .4,
             child: DropdownButton<PaymentStatus>(
               dropdownColor: Colors.white,
@@ -270,7 +270,7 @@ class _OrderListState extends State<OrderList> {
                 ),
               ),
               iconSize: 14,
-              underline: const SizedBox(),
+              underline: emptyWidget,
               value: _selectedPaymentStatus,
               items: _dropdownPaymentStatusItems,
               onChanged: (PaymentStatus? selectedFilter) {
@@ -284,7 +284,7 @@ class _OrderListState extends State<OrderList> {
           ),
           Container(
             decoration: BoxDecorations.buildBoxDecoration_1(),
-            height: 36,
+            height: 34,
             width: MediaQuery.sizeOf(context).width * .4,
             child: DropdownButton<DeliveryStatus>(
               dropdownColor: Colors.white,
@@ -301,7 +301,7 @@ class _OrderListState extends State<OrderList> {
                 ),
               ),
               iconSize: 14,
-              underline: const SizedBox(),
+              underline: emptyWidget,
               value: _selectedDeliveryStatus,
               items: _dropdownDeliveryStatusItems,
               onChanged: (DeliveryStatus? selectedFilter) {
@@ -326,13 +326,11 @@ class _OrderListState extends State<OrderList> {
           backgroundColor: MyTheme.mainColor,
           scrolledUnderElevation: 0.0,
           automaticallyImplyLeading: false,
-          actions: [
-            Container(),
-          ],
+          actions: const [emptyWidget],
           elevation: 0.0,
           titleSpacing: 0,
           flexibleSpace: Padding(
-            padding: const EdgeInsets.fromLTRB(0.0, 16.0, 0.0, 0.0),
+            padding: const EdgeInsets.only(top: 16.0),
             child: Column(
               children: [
                 Padding(
@@ -360,26 +358,24 @@ class _OrderListState extends State<OrderList> {
     }
   }
 
-  Container buildTopAppBarContainer() {
-    return Container(
-      child: Row(
-        children: [
-          Builder(
-            builder: (context) => IconButton(
-              padding: EdgeInsets.zero,
-              icon: UsefulElements.backIcon(),
-              onPressed: goBack,
-            ),
+  Widget buildTopAppBarContainer() {
+    return Row(
+      children: [
+        Builder(
+          builder: (context) => IconButton(
+            padding: EdgeInsets.zero,
+            icon: UsefulElements.backIcon(),
+            onPressed: goBack,
           ),
-          Text(
-            'purchase_history_ucf'.tr(context: context),
-            style: const TextStyle(
-                fontSize: 16,
-                color: MyTheme.dark_font_grey,
-                fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
+        ),
+        Text(
+          'purchase_history_ucf'.tr(context: context),
+          style: const TextStyle(
+              fontSize: 16,
+              color: MyTheme.dark_font_grey,
+              fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 
@@ -445,7 +441,7 @@ class _OrderListState extends State<OrderList> {
     } else if (_totalData == 0) {
       return Center(child: Text('no_data_is_available'.tr(context: context)));
     } else {
-      return Container(); // should never be happening
+      return emptyWidget; // should never be happening
     }
   }
 

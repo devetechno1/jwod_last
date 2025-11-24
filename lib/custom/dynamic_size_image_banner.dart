@@ -1,6 +1,7 @@
 import 'package:active_ecommerce_cms_demo_app/constants/app_dimensions.dart';
 import 'package:flutter/material.dart';
 
+import '../app_config.dart';
 import '../helpers/shimmer_helper.dart';
 import '../services/navigation_service.dart';
 import 'aiz_image.dart';
@@ -45,17 +46,24 @@ class _DynamicSizeImageBannerState extends State<DynamicSizeImageBanner> {
   @override
   Widget build(BuildContext context) {
     if (widget.photo == null || widget.photo!.isEmpty) {
-      return const SizedBox();
+      return emptyWidget;
     }
-    return InkWell(
-      onTap: () =>
-          NavigationService.handleUrls(widget.urlToOpen, context: context),
-      child: _aspectRatio == null
-          ? const LoadingImageBannerWidget()
-          : AspectRatio(
-              aspectRatio: _aspectRatio!,
-              child: AIZImage.radiusImage(widget.photo, widget.radius),
-            ),
+    return Align(
+      child: ConstrainedBox(
+        constraints:  BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+        ),
+        child: InkWell(
+          onTap: () =>
+              NavigationService.handleUrls(widget.urlToOpen, context: context),
+          child: _aspectRatio == null
+              ? const LoadingImageBannerWidget()
+              : AspectRatio(
+                  aspectRatio: _aspectRatio!,
+                  child: AIZImage.radiusImage(widget.photo, widget.radius),
+                ),
+        ),
+      ),
     );
   }
 }

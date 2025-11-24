@@ -39,7 +39,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>jwod.store</string>
+				<string>jwodwater.com</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>https</string>
@@ -49,7 +49,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>jwod.store</string>
+				<string>jwodwater.com</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>http</string>

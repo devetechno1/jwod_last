@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:active_ecommerce_cms_demo_app/locale/custom_localization.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'data_model/business_settings/business_settings.dart';
 import 'data_model/business_settings/update_model.dart';
@@ -13,6 +12,14 @@ export 'constants/app_images.dart';
 
 class AppConfig {
   /// To know the device operating system (ios, huawei or any android device)
+  /// Determines whether the login page should directly show full login fields
+  /// (phone/email + password + others) or just display a single "Login" button
+  /// that navigates to the detailed login form when pressed.
+  /// [showFullLoginFields] = false that means the default behavior will be used
+  /// [showFullLoginFields] = true that means the full login form will be shown
+  static const bool showFullLoginFields = false;
+
+  /// To know the device operating system (ios, huawei or any android device)
   static StoreType storeType = StoreType.unknown;
 
   ///Specifies the splash screen type to use a custom animated widget instead of a static image or traditional screen.
@@ -20,11 +27,11 @@ class AppConfig {
       SplashScreenType.splashAnimatedImageWidget;
 
   /// To make force update to app
-  static String version = '1.0.0';
+  static String version = '1.0.1';
 
   /// App Version (AV) shown on the splash screen.
   /// Used to verify the app build matches the master version.
-  static const String mobileVersion = '9.10.45';
+  static const String mobileVersion = '9.10.54';
 
   /// Backend Version (BV) used for compatibility checks.
   /// Used to verify the app is compatible with backend data.
@@ -33,16 +40,13 @@ class AppConfig {
   //configure this
   // static String copyright_text =
   //     "@ Deve Finance " + this_year; //this shows in the splash screen
-  static const String app_name_ar = "مياه جود";
-  static const String app_name_en = "Jwod Water";
 
   /// This get the name of the application in deviceLocale
-  static String appNameOnDeviceLang =
-      PlatformDispatcher.instance.locale.languageCode == 'ar'
-          ? app_name_ar
-          : app_name_en;
- static bool isDebugMode = false;
-  // static bool isDebugMode = kDebugMode;
+  static String appNameOnDeviceLang = "app_name".trGivenLocale(
+    PlatformDispatcher.instance.locale,
+  );
+
+  static bool isDebugMode = false;
   static bool turnDevicePreviewOn = isDebugMode;
 
   static String search_bar_text(BuildContext context) {
@@ -70,8 +74,10 @@ class AppConfig {
   //configure this
   static const bool HTTPS =
       true; //if you are using localhost , set this to false
-  static const DOMAIN_PATH =
-      "jwod.store"; //use only domain name without http:// or https://
+
+  /// use only domain name without http:// or https://
+  /// if you make update to old type app from multi/cms to this. to save login put the [oldTokenKey]
+  static const DOMAIN_PATH = "jwodwater.com";
 
   //do not configure these below
   static const String API_ENDPATH = "api/v2";
@@ -80,10 +86,14 @@ class AppConfig {
   static const String RAW_BASE_URL = "$PROTOCOL$DOMAIN_PATH";
   static const String BASE_URL = "$RAW_BASE_URL/$API_ENDPATH";
 
-  static const LatLng initPlace = LatLng(30.723003387451172, 31.02609634399414);
-
   // static HomePageType selectedHomePageType = HomePageType.home;
   static BusinessSettingsData businessSettingsData = BusinessSettingsData();
 
   static Map<String, dynamic> deviceInfo = {};
+
+  /// This is the token we need to get so change key if you want access token from shared preferences.
+  /// mostly in cms "user_login_token" in multi "6ammart_token" or "devetechno_token"
+  static const String oldTokenKey = "";
 }
+
+const SizedBox emptyWidget = SizedBox();

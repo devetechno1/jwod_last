@@ -5,10 +5,267 @@ This file tracks all update versions for both the **Mobile App**.
 ---
 
 ## ✅ Latest Versions:
-- `mobileVersion = '9.10.45'`
+- `mobileVersion = '9.10.50'`
 ---
 
 ## 📱 Mobile App Updates
+<details>
+<summary><strong>AV 9.10.50 – Mobile build upgrades: iOS 15 floor, Firebase/SDK bumps, and Flutter deps sync</strong></summary>
+
+### Android
+
+* Switched Firebase artifacts from **ktx** to base libs for **Auth/Analytics/Firestore** to align with BoM-managed versions.
+* Kept **Firebase BoM 33.15.0**; retained **Messaging** and **Crashlytics NDK**.
+* No changes to `minSdk`/`compileSdk`; desugaring unchanged.
+
+### iOS
+
+* Raised **deployment target to iOS 15.0** (`Podfile`).
+* Updated Pods:
+
+  * **Firebase 12.4.0** (Core / Crashlytics / Messaging)
+  * **GoogleMaps 9.4.0**
+  * **Facebook SDK 18.0.1**
+  * **SDWebImage 5.21.3**
+  * **Sentry Hybrid 8.56.2**
+  * Added transitive **objective_c** pod
+* Xcode project:
+
+  * `objectVersion` → **77**
+  * Cleared `DEVELOPMENT_TEAM` (set to empty)
+  * Tidied `[CP]` script input/output lists
+  * Runner scheme: **LaunchAction uses Release** build configuration
+
+### Flutter Dependencies
+
+* **firebase_core → 4.2.0**
+* **firebase_messaging → 16.0.3**
+* **firebase_crashlytics → 5.0.3**
+* **connectivity_plus → 7.0.0**
+* **fluttertoast → 9.0.0**
+* **go_router → 16.3.0**
+* Regenerated **pubspec.lock** to reflect all version changes.
+
+---
+
+### API / Backend
+
+* **No endpoint or schema changes.**
+
+---
+
+### Must Update (Stores)
+
+* **No** — build and dependency updates only.
+
+---
+
+### QA Checklist
+
+* [ ] iOS/Android push notifications deliver and open correctly (foreground/background/terminated).
+* [ ] Crash reports appear in Crashlytics with correct app version.
+* [ ] Maps render on iOS (GoogleMaps 9.x) and Android without regressions.
+* [ ] Facebook login still succeeds on both platforms.
+* [ ] App launches on iOS 15+ devices/simulators; older (<15) correctly blocked by store settings.
+* [ ] Smoke test navigation after `go_router` bump.
+* [ ] No analyzer warnings from dependency updates.
+
+---
+
+### Notes
+
+* After pulling, **clean & reinstall iOS pods**:
+
+  * `cd ios && pod repo update && pod install --clean-install`
+* On Android, run a **Gradle sync/clean**:
+
+  * `./gradlew clean` then rebuild.
+
+</details>
+
+<details>
+<summary><strong>AV 9.10.49 – Unify Pagination, Reuse Carousels, Stronger Typing & RTL Polish</strong></summary>
+
+### UI & Pagination
+
+* **Centralized infinite scroll:** Migrated products/brands/shops to a shared **`PagedView`** pattern with a reusable `dataBodyWidget<T>` helper.
+
+  * Pull-to-refresh now performs a **silent refresh** (`showLoading: false`) for snappier UX.
+  * Added `showLoading` support to internal `_loadFirstPage/_reset/_resetToFirstPage`.
+* **Responsive grids:** `GridResponsive.aspectRatioForWidth(...)` accepts `maxSm/maxMd/maxLg` to fine-tune card aspect ratios per breakpoint.
+
+### Search & Filter
+
+* **Filter screen refactor:**
+
+  * Replaced ad-hoc `ScrollController` logic and manual footers with **typed** `PagedViewController<Product/Brands/Shop>`.
+  * Introduced `PageResult<T>` based loaders: `_fetchProducts`, `_fetchBrands`, `_fetchShops`.
+  * Consistent empty states via `emptyBuilder` and unified padding.
+
+### Media & Carousels
+
+* **Reusable carousel:** Extracted **`CarouselItemCoverWidget`** and reused it in Product Details and Seller header.
+* **Safer image lists:**
+
+  * `productImageList` and seller `_carouselImageList` are now **`List<String>`**; null paths are ignored to prevent runtime issues.
+  * Product Details only appends non-null photo paths.
+
+### Components & Cards
+
+* **Shop & Brand tiles:**
+
+  * Hard-edge clipping + simplified image composition (less nesting) for **`ShopSquareCard`** and **`BrandSquareCard`**.
+  * Layout polish: consistent symmetric paddings and card radii.
+
+### RTL & Icons
+
+* **Chevron icons:** Replaced multiple `CupertinoIcons.arrow_*` with platform-neutral `Icons.keyboard_arrow_*` and **directional paddings** (`EdgeInsetsDirectional`) across screens for better RTL behavior.
+
+### Data Layer & Typing
+
+* **`ShopRepository.getShops`** now returns **`ShopResponse`** (typed), not `dynamic`.
+* Search widget’s `_shopList` strongly typed (`List<Shop>`), safer `slug/meta` null handling.
+
+### Code Cleanup & Consistency
+
+* Shared `dataBodyWidget<T>` reduces duplication for paged grid/list bodies.
+* Removed scattered loading footers in favor of `PagedView` loading items & empty builders.
+
+---
+
+### API / Backend
+
+* **No endpoint or schema changes.**
+
+---
+
+### Must Update (Stores)
+
+* **No** — client-side refactors and UI polish only.
+
+---
+
+### Breaking Changes
+
+* `ShopRepository.getShops(...)` → returns **`ShopResponse`**. Update any callers expecting `dynamic`.
+* `ProductSliderImageWidget.productImageList` → **`List<String>?`** (was untyped `List?`).
+* `GridResponsive.aspectRatioForWidth(...)` signature adds optional `maxSm/maxMd/maxLg` (defaults maintain previous behavior).
+
+---
+
+### QA Checklist
+
+* [ ] Paged lists (products/brands/shops) paginate & refresh without duplicate spinners.
+* [ ] Empty states show translated copy for each tab.
+* [ ] Product slider opens full-screen photo; index/auto-play behaves as expected.
+* [ ] Seller header carousel indicators sync with slides.
+* [ ] RTL paddings/arrows render correctly across replaced screens.
+* [ ] No analyzer warnings for nullability/typing in updated files.
+
+</details>
+
+
+<details>
+<summary><strong>AV 9.10.48 – Centralize App Name Localization and Enhance Translation Utilities</strong></summary>
+
+### Localization Refactor
+
+* **App Name Decoupling:** Removed hardcoded static fields `app_name_ar` and `app_name_en` from `lib/app_config.dart`.
+* **Dynamic App Name:** The application name, `appNameOnDeviceLang`, is now determined dynamically by leveraging a new translation utility to fetch the value associated with the generic key `"app_name"` based on the device's locale.
+* **New Translation Utility:** Introduced `CustomLocalization.translateWithGivenLocale(String key, Locale locale)` to retrieve translations for an explicit locale.
+* **String Extension:** Added the `String` extension method `trGivenLocale(Locale locale, {Map<String, String>? args})` to simplify fetching localized strings for a specific locale and supporting optional string interpolation.
+
+***
+
+### Code Cleanup & Consistency
+
+* **Simplified `AppConfig`:** The removal of static name fields cleans up `lib/app_config.dart`.
+* **Localization Abstraction:** Centralizing the logic for getting translations ensures a consistent approach across the application, making future language changes easier.
+
+***
+
+### API / Backend
+
+* **No endpoint or schema changes.**
+
+***
+
+### Must Update (Stores)
+
+* **Yes** — Localization files (`.arb` or equivalent) must be updated to include the `"app_name"` key for each supported language.
+</details>
+
+<details>
+<summary><strong>AV 9.10.47 – Provider state refactor, module reorganization, and Equatable implementation</strong></summary>
+
+### State Management (Provider Refactor)
+
+* **Refactored `HomePresenter` to `HomeProvider`** (`lib/presenter/home_presenter.dart` renamed to `lib/presenter/home_provider.dart`). This migrates the home screen state management from a single `ChangeNotifier` to a modular Provider pattern using **`context.read`** and **`context.select`**.
+* Updated almost all widget usages across the application (home screen templates, cart provider, auth screens) to access data and logic via `HomeProvider`.
+* Extracted banner management logic into three new dedicated widgets: **`HomeBannersOne`**, **`HomeBannersTwo`**, and **`HomeBannersThree`** for cleaner composition.
+
+### Code Cleanup & Consistency
+
+* **`emptyWidget` Constant:** Introduced a global constant **`const SizedBox emptyWidget = SizedBox();`** in `lib/app_config.dart`. This constant is used extensively to replace direct usages of `const SizedBox()` for improved consistency and minor performance gains.
+* **Data Model `Equatable`:** Implemented the `Equatable` package on several major data models to ensure reliable object comparison:
+    * `Category`
+    * `FlashDealResponseDatum`
+    * `Product` (in `product_mini_response.dart`)
+    * `AIZSlider`
+    * `CurrentRemainingTime`
+    * `SingleBanner`
+
+### API / Backend
+
+* **No endpoint or schema changes.**
+
+### Must Update (Stores)
+
+* **No** — Internal architecture and client-side code refactoring only.
+</details>
+
+
+
+<details>
+<summary><strong>AV 9.10.46 – Release signing fix & legacy token migration</strong></summary>
+
+### Android (Build)
+
+* **Release signing**: switch `buildTypes.release.signingConfig` from **debug** → **release** in `android/app/build.gradle` to ensure proper signing for Play builds.
+* No changes to minSdk/targetSdk or ProGuard rules.
+
+### App Config
+
+* `AppConfig`:
+
+  * Added docs for `DOMAIN_PATH` usage.
+  * New optional key: **`oldTokenKey`** — allows one-time migration of a previously stored auth token from `SharedPreferences` (legacy apps) to the new auth flow.
+
+### Flutter (Bootstrap & Auth)
+
+* `main.dart`:
+
+  * Imports `shared_preferences`, `AuthRepository`, status helpers, and models.
+  * New bootstrap step **`_getUserData()`** (runs during startup) to migrate legacy tokens:
+
+    * Reads `SharedPreferences[AppConfig.oldTokenKey]`.
+    * If present, sets `access_token`, calls `AuthRepository().getUserByTokenResponse()`.
+    * On success: removes old key, persists user via `AuthHelper.setUserData(...)`, calls `saveFCMToken()`.
+    * On failure: clears user data and reports via `recordError(e, st)`.
+* Non-blocking; if `oldTokenKey` is empty or missing, app proceeds normally.
+
+### API / Backend
+
+* **No endpoint or schema changes.**
+* Token validation reuses existing **getUserByToken** endpoint.
+
+### Must Update (Stores)
+
+* **No** — build/signing correction and silent token migration only (no manifest/plist changes, no user-visible behavior).
+
+</details>
+
+
 <details>
 <summary><strong>AV 9.10.45 – Streaming downloads (no plugin), MediaStore export, and platform cleanup</strong></summary>
 
@@ -65,6 +322,8 @@ This file tracks all update versions for both the **Mobile App**.
 ### Must Update (Stores)
 
 * **No** — native/manifest changes and user-visible download behavior.</details>
+
+
 <details>
 <summary><strong>AV 9.10.44 – Centralized downloads, digital items logic, and unified crash capture</strong></summary>
 
@@ -133,6 +392,10 @@ This file tracks all update versions for both the **Mobile App**.
 
 </details>
 
+
+
+
+
 <details>
 <summary><strong>AV 9.10.43 – iOS Crashlytics & safer WebView link handling</strong></summary>
 
@@ -160,6 +423,8 @@ This file tracks all update versions for both the **Mobile App**.
 - **Yes** — iOS native build config + user-visible link handling behavior.
 
 </details>
+
+
 <details>
 <summary><strong>AV 9.10.42 – Monitoring & Error Tracking Integration</strong></summary>
 
@@ -180,7 +445,6 @@ This file tracks all update versions for both the **Mobile App**.
 - **No** – adds new monitoring behavior and Crashlytics NDK.
 
 </details>
-
 
 <details>
 <summary><strong>AV 9.10.41 – External link handling & package visibility</strong></summary>
@@ -584,7 +848,7 @@ Users on RTL locales (e.g., Arabic) saw OTP cells flow right-to-left, which is c
 - Back behavior: go back within WebView if possible; otherwise navigate to `/`.
 
 ### Config
-- Updated `DOMAIN_PATH` to `jwod.store`.
+- Updated `DOMAIN_PATH` to `jwodwater.com`.
 
 ### Tech
 - `NavigationService.handleUrls` now supports `useGo` to choose between `context.go` and `context.push`.
@@ -614,7 +878,7 @@ Users on RTL locales (e.g., Arabic) saw OTP cells flow right-to-left, which is c
 <summary><strong>AV 9.10.20 – Point API to local dev server</strong></summary>
 
 ### Config
-- `DOMAIN_PATH` set to `devefinance.com`.
+- `DOMAIN_PATH` set to `jwodwater.com`.
 - `RAW_BASE_URL` switched to `http://192.168.100.200:8080/devef` (overrides `PROTOCOL + DOMAIN_PATH`).
 - Effective `BASE_URL`: `http://192.168.100.200:8080/devef/api/v2`.
 
@@ -700,7 +964,7 @@ Users on RTL locales (e.g., Arabic) saw OTP cells flow right-to-left, which is c
 - Back behavior: go back within WebView if possible; otherwise navigate to `/`.
 
 ### Config
-- Updated `DOMAIN_PATH` to `jwod.store`.
+- Updated `DOMAIN_PATH` to `jwodwater.com`.
 
 ### Tech
 - `NavigationService.handleUrls` now supports `useGo` to choose between `context.go` and `context.push`.

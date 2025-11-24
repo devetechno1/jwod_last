@@ -12,9 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../app_config.dart';
 import '../data_model/language_list_response.dart';
+import '../presenter/home_provider.dart';
 import '../providers/locale_provider.dart';
-import 'home/home.dart';
 
 class ChangeLanguage extends StatefulWidget {
   const ChangeLanguage({Key? key}) : super(key: key);
@@ -115,7 +116,7 @@ class _ChangeLanguageState extends State<ChangeLanguage> {
             CustomLocalization.supportedLocales.first.languageCode,
       );
 
-      await homeData.onRefresh();
+      await context.read<HomeProvider>().onRefresh();
 
     }
   }
@@ -287,7 +288,7 @@ class _ChangeLanguageState extends State<ChangeLanguage> {
     );
   }
 
-  Container buildCheckContainer(bool check) {
+  Widget buildCheckContainer(bool check) {
     return check
         ? Container(
             height: 16,
@@ -301,6 +302,6 @@ class _ChangeLanguageState extends State<ChangeLanguage> {
               child: Icon(Icons.check, color: Colors.white, size: 10),
             ),
           )
-        : Container();
+        : emptyWidget;
   }
 }

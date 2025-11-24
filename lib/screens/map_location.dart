@@ -27,13 +27,13 @@ class MapLocation extends StatefulWidget {
 class MapLocationState extends State<MapLocation>
     with SingleTickerProviderStateMixin {
   // PickResult? selectedPlace;
-  static LatLng kInitialPosition = AppConfig.initPlace;
+  static LatLng kInitialPosition = AppConfig.businessSettingsData.initPlace;
 
   GoogleMapController? _controller;
 
   @override
   void dispose() {
-    _controller?.dispose();
+    // _controller?.dispose();
     super.dispose();
   }
 
@@ -56,13 +56,14 @@ class MapLocationState extends State<MapLocation>
 
   setInitialLocation() {
     kInitialPosition = LatLng(
-        widget.address.lat ?? AppConfig.initPlace.latitude,
-        widget.address.lang ?? AppConfig.initPlace.longitude);
+        widget.address.lat ?? AppConfig.businessSettingsData.initPlace.latitude,
+        widget.address.lang ??
+            AppConfig.businessSettingsData.initPlace.longitude);
     setState(() {});
   }
 
   setDummyInitialLocation() {
-    kInitialPosition = AppConfig.initPlace;
+    kInitialPosition = AppConfig.businessSettingsData.initPlace;
     setState(() {});
   }
 
@@ -103,6 +104,8 @@ class MapLocationState extends State<MapLocation>
                 formattedAddress =
                     '${temp.first.street}, ${temp.first.locality}, ${temp.first.administrativeArea}, ${temp.first.country}';
               } catch (e) {}
+
+              if (!mounted) return;
 
               isLoadingFormattedAddress = false;
               // print("onPlacePicked..."+result.toString());
@@ -205,7 +208,7 @@ class MapLocationState extends State<MapLocation>
                   // controller: _countryController,
                   debounceDuration: const Duration(milliseconds: 500),
                   emptyBuilder: (context) {
-                    return const SizedBox();
+                    return emptyWidget;
                   },
                   constraints: BoxConstraints(
                       maxHeight: MediaQuery.sizeOf(context).height * 0.7),
